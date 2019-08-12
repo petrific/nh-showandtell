@@ -1,17 +1,30 @@
-<html ng-app="phonecatApp">
+<!DOCTYPE html>
+<html ng-app="employeeApp">
 <head>
-  ...
-  <script src="node_modules/angular/angular.js"></script>
-  <script src="app.js"></script>
+  <link rel="stylesheet" href="lib/css/bootstrap.min.css">  
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="lib/js/angular.min.js"></script>
+  <script src="employee-controller.js"></script>
 </head>
-<body ng-controller="PhoneListController">
-
-  <ul>
-    <li ng-repeat="phone in phones">
-      <span>{{phone.name}}</span>
-      <p>{{phone.snippet}}</p>
-    </li>
-  </ul>
-
+<body ng-controller="mainController">
+  <form ng-submit="submitForm()">
+   <div class="form-group" style="margin:10% 10% 10% 10%">
+    <h2 style="text-align:center">Employee Details</h2>
+    <label>First Name</label>
+      <input class="form-control" type="text" id="firstName" ng-model="data.FirstName" /><br />
+      <label>Last Name</label>
+      <input class="form-control" type="text" id="lastName" ng-model="data.LastName" /><br />
+      <label>Position</label>
+      <input class="form-control" type="text" id="position" ng-model="data.Position" /><br />
+      <label>Salary</label>
+      <input class="form-control" type="text" id="salary" ng-model="data.Salary" /><br />
+      <label>Location</label>
+      <input class="form-control" type="text" id="location" ng-model="data.Location" /><br />
+      <label>Marital Status</label>
+      <input class="form-control" type="text" id="maritalStatus" ng-model="data.MaritalStatus" /><br />
+    <input type="submit" class="btn btn-primary" value="Submit" />
+  </div>
+</div>
+  </form>
 </body>
 </html>

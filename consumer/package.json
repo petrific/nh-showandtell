@@ -1,5 +1,5 @@
 {
-  "name": "newhirepresentation-producer",
+  "name": "newhirepresentation-consumer",
   "version": "1.0.0",
   "description": "A project for the new hire presentation regarding event sourcing",
   "main": "index.js",

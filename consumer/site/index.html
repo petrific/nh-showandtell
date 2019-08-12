@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html ng-app="consumerApp">
+<head>
+  <link rel="stylesheet" href="lib/css/bootstrap.min.css">  
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="lib/js/angular.min.js"></script>
+  <script src="employee-controller.js"></script>
+</head>
+<body ng-controller="mainController">
+  <div style="float: right; margin: 50% 0% 10% 50%">
+    <h2>Employee Info</h2>
+    <lu>
+      <li>Name: {{data.FirstName}} {{data.LastName}}</li>
+    </lu>
+  </div>
+<ul class="list-group">
+  <li ng-repeat="(key, value) in events">
+    <button class="btn btn-success" ng-click="applyEvent(key)">Event {{key}}</button>
+  </li>
+</ul>
+</body>
+</html>

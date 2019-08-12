@@ -4,6 +4,7 @@ var http = require('http');
 var amqp = require('amqplib/callback_api');
 var myParser = require("body-parser");
 var app = express();
+var args = process.argv.slice(2);
 
 var employee = {
     FirstName: "John",
@@ -11,13 +12,14 @@ var employee = {
     Position: "None",
     Salary: 0,
     Location: "Winterfell",
+    MaritalStatus: "Single",
     LastUpdated: new Date(2010, 01, 01),
-    Version: 0
+    Version: 0,
 };
 
 var RabbitWrangler = {
     Publish: function(queueName, message) {
-        amqp.connect('amqp://newhire:ultimate@localhost', function(error0, connection) {
+        amqp.connect('amqp://newhire:ultimate@'+args[0], function(error0, connection) {
         if (error0) {
             throw error0;
         }
@@ -46,35 +48,35 @@ var RabbitWrangler = {
 };
 
 app.use(express.static(__dirname + '/site'));
-app.use(myParser.urlencoded({extended : true}));
-    app.get('*', function(req, res) {
-        res.sendFile(__dirname + '/site/index.html'); // load the single view file (angular will handle the page changes on the front-end)
-    });
-
-
+app.use(myParser.json());
 
 app.put("/updateEmployee", function(request, response) {
-    var query = request.query;
+    var query = request.body;
     var messagePayload = {};
     var changed = false;
-    if(query.firstName && query.firstName != employee.FirstName)
+    
+    if(!query)
     {
-        employee.FirstName = query.firstName;
-        messagePayload.firstName = employee.FirstName;
-        changed = true;
+        return employee;
     }
 
-    if(query.lastName && query.lastName != employee.LastName)
-    {
-        employee.LastName = query.lastName;
-        messagePayload.lastName = employee.LastName;
-        changed = true;
-    }    
+    Object.keys(query).forEach(function(key) {
+        if(key === "LastUpdated"){
+            return;
+        }
+        if(employee[key] !== query[key]){
+            messagePayload[key] = query[key];
+            employee[key] = query[key];
+            changed = true;
+        }
+    });
 
     if(changed) {
         employee.LastUpdated = new Date(Date.now());
         employee.Version++;
-        RabbitWrangler.Publish("employee", JSON.stringify(employee));
+        messagePayload.LastUpdated = employee.LastUpdated;
+        messagePayload.Version = employee.Version;
+        RabbitWrangler.Publish("employee", JSON.stringify(messagePayload));
     }
 
     response.setHeader('Content-Type', 'application/json');
