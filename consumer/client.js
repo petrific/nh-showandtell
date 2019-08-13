@@ -59,11 +59,11 @@ app.get("/applyEvent", function(request, response){
     var index = request.query.index;
     var currEvent = consumedEvents[index];
     Object.keys(currEvent).forEach(function(key) {
-        if(employee[key]){
+        if(employee.hasOwnProperty(key)){
             employee[key] = currEvent[key];
         }
     });
-    consumedEvents.pop(currEvent);
+    consumedEvents.splice(index, 1);
     response.setHeader('Content-Type', 'application/json');
     var payload = {
         events: consumedEvents,

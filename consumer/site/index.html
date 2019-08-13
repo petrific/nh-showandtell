@@ -7,16 +7,25 @@
   <script src="employee-controller.js"></script>
 </head>
 <body ng-controller="mainController">
-  <div style="float: right; margin: 50% 0% 10% 50%">
-    <h2>Employee Info</h2>
-    <lu>
-      <li>Name: {{data.FirstName}} {{data.LastName}}</li>
-    </lu>
-  </div>
-<ul class="list-group">
-  <li ng-repeat="(key, value) in events">
-    <button class="btn btn-success" ng-click="applyEvent(key)">Event {{key}}</button>
-  </li>
-</ul>
+<div class="row">
+  <div class="col-sm">
+    <div class="card">
+        <h2 class="card-title" style="background-color:rgb(236, 150, 78);color: white; text-align: center">Events</h2>
+        <ul class="list-group" ng-repeat="(key, value) in events">
+          <div class="list-item">
+            <button class="btn btn-success" style="width: 100%; border-radius: 0" ng-click="applyEvent(key)">Apply Event {{key}} - Version {{value.Version}}</button>
+          </div>
+        </ul>
+      </div>        
+    </div>
+    <div class="col-md">
+      <div class="card">
+          <h2 class="card-title" style="background-color:rgb(70, 197, 70);color: white; text-align:center;">Employee Info</h2>
+          <div class="list-group" ng-repeat="(key, value) in props">
+            <div class="list-item"  style="background-color:rgb(255, 255, 255);color: rgb(0, 0, 0);">{{value}}: {{data[value]}}</div>
+          </div>
+      </div>
+    </div>
+</div>  
 </body>
 </html>
