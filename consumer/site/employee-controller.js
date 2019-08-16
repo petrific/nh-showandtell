@@ -20,6 +20,14 @@ employeeApp.controller('mainController', ['$scope', '$http', "$interval", functi
         });
     };
 
+    $scope.reset = function() {
+        $http.get('/reset')
+        .then(function(response) {
+            $scope.events = response.data.events;
+            $scope.data = response.data.data;
+        });
+    }
+
     $interval(function(){
         $http.get('/currentState').then(function(response) {
             $scope.data = response.data;

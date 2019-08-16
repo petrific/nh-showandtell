@@ -19,7 +19,11 @@ var employee = {
 
 var RabbitWrangler = {
     Publish: function(queueName, message) {
-        amqp.connect('amqp://newhire:ultimate@'+args[0], function(error0, connection) {
+        var hostName = "localhost";
+        if(args[0]){
+            hostName = args[0];
+        }
+        amqp.connect('amqp://newhire:ultimate@' + hostName, function(error0, connection) {
         if (error0) {
             throw error0;
         }

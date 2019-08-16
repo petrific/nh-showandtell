@@ -3,5 +3,4 @@ WORKDIR /usr/src/app
 ADD . .
 RUN npm install
 EXPOSE 9090
-ARG rabbit="localhost"
-CMD ["node", "client.js", $rabbit]
+CMD ["node", "client.js"]

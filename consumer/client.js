@@ -18,14 +18,19 @@ var employee = {
 
 var args = process.argv.slice(2);
 var consumedEvents = [];
+var allConsumedEvents = [];
 
 var RabbitWrangler = {
     Consume: function(queueName) {
-
-        amqp.connect('amqp://newhire:ultimate@' + args[0], function(error0, connection) {
+        var hostName = "localhost";
+        if(args[0]){
+            hostName = args[0];
+        }
+        amqp.connect('amqp://newhire:ultimate@' + hostName, function(error0, connection) {
             if (error0) {
                 throw error0;
             }
+            
             connection.createChannel(function(error1, channel) {
                 if (error1) {
                     throw error1;
@@ -39,6 +44,7 @@ var RabbitWrangler = {
                     console.log(" [x] Consumed %s", contentStr);
                     var data = JSON.parse(contentStr);
                     consumedEvents.push(data);
+                    allConsumedEvents.push(data);
                 }, { noAck: true });
             });
         });
@@ -53,6 +59,25 @@ app.use(myParser.json());
 app.get("/currentState", function(request, response){
     response.setHeader('Content-Type', 'application/json');
     response.end(JSON.stringify(employee));
+});
+
+app.get("/reset", function(request, response){
+    consumedEvents = allConsumedEvents.slice();
+    employee = {
+        FirstName: "John",
+        LastName: "Snow",
+        Position: "None",
+        Salary: 0,
+        Location: "Winterfell",
+        MaritalStatus: "Single",
+        LastUpdated: new Date(2010, 01, 01),
+        Version: 0,
+    };    
+    var payload = {
+        events: consumedEvents,
+        data: employee
+    };
+    response.end(JSON.stringify(payload));
 });
 
 app.get("/applyEvent", function(request, response){
