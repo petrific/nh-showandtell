@@ -1,0 +1,7 @@
+FROM node:10
+WORKDIR /usr/src/app
+ADD . .
+RUN npm install
+EXPOSE 8080
+ARG rabbit="localhost"
+CMD ["node", "client.js", $rabbit]
