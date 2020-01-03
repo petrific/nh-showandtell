@@ -22,11 +22,9 @@ var allConsumedEvents = [];
 
 var RabbitWrangler = {
     Consume: function(queueName) {
-        var hostName = "localhost";
-        if(args[0]){
-            hostName = args[0];
-        }
-        amqp.connect('amqp://newhire:ultimate@' + hostName, function(error0, connection) {
+        var connectionString = process.env.RABBIT_CONNECTION || 'amqp://newhire:ultimate@localhost/';
+        console.log(connectionString);
+        amqp.connect(connectionString, function(error0, connection) {
             if (error0) {
                 throw error0;
             }
@@ -102,4 +100,4 @@ app.get("/getEvents", function(request, response){
     response.end(JSON.stringify(consumedEvents));
 });
 
-app.listen("8080");
+app.listen(process.env.APP_PORT || "8080");
