@@ -5,19 +5,33 @@ services:
     ports: 
       - "9090:9090"
     container_name: producer
+    environment:
+      - RABBIT_CONNECTION=amqp://newhire:ultimate@rabbit:5672/
+      - MONGO_CONNECTION=mongodb://mongo:27017/
+    links:
+      - rabbit
+      - mongo
   consumer:
     build: ./consumer
     ports: 
       - "8080:8080"
     container_name: consumer
+    environment:
+      - RABBIT_CONNECTION=amqp://newhire:ultimate@rabbit:5672/
+    links:
+      - rabbit
   rabbit:
     image: rabbitmq:3-management
     container_name: my-rabbit
     ports:
       - "15672:15672"
-      - "15671:15671"
       - "5672:5672"
     environment:
       - RABBITMQ_DEFAULT_USER=newhire
       - RABBITMQ_DEFAULT_PASS=ultimate
-
+      - RABBITMQ_DEFAULT_VHOST=/
+  mongo:
+    image: mongo:3.4
+    container_name: nh_mongo
+    ports:
+      - "27017:27017"
