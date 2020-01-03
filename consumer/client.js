@@ -29,19 +29,29 @@ var RabbitWrangler = {
                 throw error0;
             }
             
+            // 1) Create connection to the channel
             connection.createChannel(function(error1, channel) {
                 if (error1) {
                     throw error1;
                 }
-    
+                
+                // 2) Ensure we have the queue
                 channel.assertQueue(queueName, {
                     durable: false
                 });
+
+                // 3) Consume messages from the queue
                 channel.consume(queueName, function(msg){   
                     var contentStr = msg.content.toString();
                     console.log(" [x] Consumed %s", contentStr);
+                    // 4) Parse the message data 
+                    // (This is only because the message is JSON)
                     var data = JSON.parse(contentStr);
+
+                    // 5) Add it to our consumtion queue
                     consumedEvents.push(data);
+
+                    // 6) Also add it to the "event store"
                     allConsumedEvents.push(data);
                 }, { noAck: true });
             });
@@ -53,6 +63,28 @@ RabbitWrangler.Consume('employee');
 
 app.use(express.static(__dirname + '/site'));
 app.use(myParser.json());
+
+app.get("/applyEvent", function(request, response){
+    var index = request.query.index;
+    // 1) Get the event at the index
+    var currEvent = consumedEvents[index];
+    Object.keys(currEvent).forEach(function(key) {
+        // Enumerate through each property 
+        // and set any that matches to the properties
+        if(employee.hasOwnProperty(key)){
+            employee[key] = currEvent[key];
+        }
+    });
+    // 2) Remove the event from our queue
+    consumedEvents.splice(index, 1);
+    response.setHeader('Content-Type', 'application/json');
+    // 3) And send a response with the updated scope
+    var payload = {
+        events: consumedEvents,
+        data: employee
+    };
+    response.end(JSON.stringify(payload));
+});
 
 app.get("/currentState", function(request, response){
     response.setHeader('Content-Type', 'application/json');
@@ -71,23 +103,6 @@ app.get("/reset", function(request, response){
         LastUpdated: new Date(2010, 01, 01),
         Version: 0,
     };    
-    var payload = {
-        events: consumedEvents,
-        data: employee
-    };
-    response.end(JSON.stringify(payload));
-});
-
-app.get("/applyEvent", function(request, response){
-    var index = request.query.index;
-    var currEvent = consumedEvents[index];
-    Object.keys(currEvent).forEach(function(key) {
-        if(employee.hasOwnProperty(key)){
-            employee[key] = currEvent[key];
-        }
-    });
-    consumedEvents.splice(index, 1);
-    response.setHeader('Content-Type', 'application/json');
     var payload = {
         events: consumedEvents,
         data: employee

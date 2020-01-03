@@ -73,26 +73,31 @@ var RabbitWrangler = {
         if (error0) {
             throw error0;
         }
-        connection.createChannel(function(error1, channel) {
-            if (error1) {
-                throw error1;
-            }
+            // 1) Create connection to the channel
+            connection.createChannel(function(error1, channel) {
+                if (error1) {
+                    throw error1;
+                }
     
-    
-            channel.assertQueue(queueName, {
+                // 2) Ensure we have the queue
+                channel.assertQueue(queueName, {
                 durable: false
-            });
-            if(channel.sendToQueue(queueName, Buffer.from(message))){   
-                console.log(" [x] Sent %s", message);
-            }
-            else
-            {
-                console.log("Failed to send message");                
-            }
+                });
 
-            setTimeout(function() { 
-                connection.close(); 
-                }, 500)        });
+                // 3) Publish messages to the queue
+                if(channel.sendToQueue(queueName, Buffer.from(message))){   
+                    console.log(" [x] Sent %s", message);
+                }
+                else
+                {
+                    console.log("Failed to send message");                
+                }
+                // 4) Wait a little bit for the message to 
+                //    actually send
+                setTimeout(function() { 
+                    connection.close(); 
+                }, 500)        
+            });
        });
     },
 };
@@ -111,30 +116,38 @@ app.put("/updateEmployee", function(request, response) {
         return employee;
     }
 
+    // 1) Enumerate thru each value in the request
     Object.keys(query).forEach(function(key) {
         if(key === "LastUpdated"){
             return;
         }
         if(employee[key] !== query[key]){
+            // 2) If we find a property set to a value different than the current value, we set it
             messagePayload[key] = query[key];
             employee[key] = query[key];
             mongoUpdate.$set[key] = query[key];
+            // 3) And indicate the aggregate has been changed
             changed = true;
         }
     });
 
     if(changed) {
+        // 4) Create a message payload containing the updated properties
         employee.LastUpdated = new Date(Date.now());
+        // 5) Increment the aggregate version
         employee.Version++;
         messagePayload.LastUpdated = employee.LastUpdated;
         messagePayload.Version = employee.Version;
         mongoUpdate.$set.LastUpdated = employee.LastUpdated;
         mongoUpdate.$set.Version = employee.Version;
         Mango.Update(mongoUpdate).then(() => Mango.Load().then(e => { employee = e; }));
+        // 6) Publish the message to the queue.
         RabbitWrangler.Publish("employee", JSON.stringify(messagePayload));
     }
 
     response.setHeader('Content-Type', 'application/json');
+
+    // 7) Return the updated aggregate
     response.end(JSON.stringify(employee));
 });
 
